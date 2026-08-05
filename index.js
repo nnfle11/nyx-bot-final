@@ -3,7 +3,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.get('/', (req, res) => {
-  res.send('ASTRA SYSTEM is running perfectly!');
+  res.send('ASTRA Full System is running perfectly!');
 });
 
 app.listen(port, '0.0.0.0', () => {
@@ -121,7 +121,7 @@ client.on('messageCreate', async (message) => {
         return;
     }
 
-    // ================== أوامر الإدارة ==================
+    // ================== أوامر الإدارة العامة ==================
     if (command === 'قفل') {
         if (!message.member.permissions.has(PermissionsBitField.Flags.Administrator)) return;
         await message.channel.permissionOverwrites.edit(message.guild.id, { SendMessages: false });
@@ -155,8 +155,11 @@ client.on('messageCreate', async (message) => {
         }
     }
 
-    // --- الأوامر التي تتطلب الرد (Reply) ---
-    if (command === 'اسكت' || command === 'تكلم' || command === 'باند' || command === 'طرد' || command === 'تنبيه' || command === 'سجن' || command === 'pf') {
+    // ================== الأوامر التي تتطلب الرد (Reply) ==================
+    const autoRoleCommands = ['صور', 'هير', 'لايف', 'كاميرا', 'العاب'];
+    const adminActionCommands = ['اسكت', 'تكلم', 'باند', 'طرد', 'تنبيه', 'سجن', 'pf'];
+
+    if (adminActionCommands.includes(command) || autoRoleCommands.includes(command)) {
         
         if (!message.reference) {
             return message.reply('⚠️ يجب عليك إستخدام هذا الأمر بالرد (Reply) على رسالة الشخص المستهدف!');
@@ -168,6 +171,29 @@ client.on('messageCreate', async (message) => {
         const targetMember = referencedMsg.member || await message.guild.members.fetch(referencedMsg.author.id).catch(() => null);
         if (!targetMember) return message.reply('تعذر العثور على هذا العضو في السيرفر!');
 
+        // --- 1. سيستم إعطاء وإزالة الرولات بالرد ---
+        if (autoRoleCommands.includes(command)) {
+            if (!message.member.permissions.has(PermissionsBitField.Flags.ManageRoles)) return;
+
+            const roleName = command; // اسم الرتبة نفس الكلمة المكتوبة
+            const role = message.guild.roles.cache.find(r => r.name === roleName);
+
+            if (!role) {
+                return message.reply(`لم يتم العثور على رتبة باسم "**${roleName}**" في السيرفر! يرجى إنشاؤها أولاً.`);
+            }
+
+            if (targetMember.roles.cache.has(role.id)) {
+                await targetMember.roles.remove(role).catch(() => {});
+                await sendLog(message.guild, '🏷️ إزالة رتبة', `تم إزالة رتبة **${roleName}** من ${targetMember} بواسطة ${message.author}`, '#ff6600');
+                return message.reply(`تم إزالة رتبة **${roleName}** من العضو ${targetMember}.`);
+            } else {
+                await targetMember.roles.add(role).catch(() => {});
+                await sendLog(message.guild, '🏷️ إعطاء رتبة', `تم إعطاء رتبة **${roleName}** للعضو ${targetMember} بواسطة ${message.author}`, '#00ff00');
+                return message.reply(`تم إعطاء رتبة **${roleName}** للعضو ${targetMember} بنجاح!`);
+            }
+        }
+
+        // --- 2. باقي الأوامر الإدارية ---
         if (command === 'اسكت') {
             if (!message.member.permissions.has(PermissionsBitField.Flags.ModerateMembers)) return;
 
