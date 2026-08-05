@@ -6,10 +6,21 @@ app.get('/', (req, res) => {
   res.send('Bot is working!');
 });
 
-app.listen(port, () => {
+// ربط السيرفر بـ 0.0.0.0 للتوافق الكامل مع Render
+app.listen(port, '0.0.0.0', () => {
   console.log(`Server is running on port ${port}`);
 });
-const { Client, GatewayIntentBits, Partials, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, PermissionsBitField } = require('discord.js');
+
+const { 
+  Client, 
+  GatewayIntentBits, 
+  Partials, 
+  ActionRowBuilder, 
+  ButtonBuilder, 
+  ButtonStyle, 
+  ChannelType, 
+  PermissionsBitField 
+} = require('discord.js');
 
 const client = new Client({
     intents: [
@@ -69,4 +80,7 @@ client.on('interactionCreate', async (interaction) => {
     }
 });
 
-client.login(process.env.DISCORD_TOKEN);
+// استخدام process.env.TOKEN المتوافق مع إعدادات Render
+client.login(process.env.TOKEN);
+
+
