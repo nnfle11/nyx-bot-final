@@ -3,7 +3,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.get('/', (req, res) => {
-  res.send('ASTRA Bot Pro Ticket System is running!');
+  res.send('ASTRA Bot Pro Ticket System with Logs is running!');
 });
 
 app.listen(port, '0.0.0.0', () => {
@@ -33,17 +33,18 @@ const client = new Client({
     partials: [Partials.Channel],
 });
 
+// ID قناة تكت-لوقز مدمج جاهز
+const LOG_CHANNEL_ID = '1523537562289967104';
+
 client.once('ready', () => {
     console.log(`Ready! Logged in as ${client.user.tag}`);
 });
 
 client.on('messageCreate', async (message) => {
-    // أمر إغلاق التذكرة إذا كتب العضو أو الإداري !close
+    // أمر إغلاق التذكرة
     if (message.content === '!close') {
         if (message.channel.name.startsWith('ticket-')) {
-            await message.channel.send('🔒 جاري إغلاق التذكرة وحذف القناة خلال 5 ثوانٍ...');
-            setTimeout(() => message.channel.delete().catch(() => {}), 5000);
-            return;
+            await closeTicket(message.channel, message.author);
         }
     }
 
@@ -60,67 +61,33 @@ client.on('messageCreate', async (message) => {
                 '📌 **ملاحظات وقوانين مهمة قبل فتح التذكرة:**\n' +
                 '• يرجى اختيار نوع التذكرة المناسب لطلبك من القائمة المنسدلة أدناه.\n' +
                 '• في حال فتح تذكرة بدون سبب أو الاستهانة بالإدارة سيتم التعامل مع العضو بالعقوبة المناسبة.\n' +
-                '• يرجى الصبر وانتظار راد الإدارة وعدم تكرار الإشارات (Mention).\n\n' +
+                '• يرجى الصبر وانتظار رد الإدارة وعدم تكرار الإشارات (Mention).\n\n' +
                 '▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬'
             )
             .setFooter({ text: 'ASTRA Support System • يرجى اختيار نوع التذكرة بالأسفل' });
 
         const selectMenu = new StringSelectMenuBuilder()
             .setCustomId('ticket_select')
-            .setPlaceholder('اختر نوع التذكرة من هنا...')
+            .setPlaceholder('اختر نوع التذكرة...')
             .addOptions([
-                {
-                    label: 'استفسار',
-                    description: '@Inquiry - لطرح أي سؤال أو استفسار عام',
-                    value: 'inquiry',
-                    emoji: '❓',
-                },
-                {
-                    label: 'شكوى',
-                    description: '@Complaint - تقديم شكوى رسمية ضد عضو أو إداري',
-                    value: 'complaint',
-                    emoji: '📝',
-                },
-                {
-                    label: 'طلب رول نشط',
-                    description: '@Active Role - التقديم للحصول على الرتب التفاعلية',
-                    value: 'active_role',
-                    emoji: '⭐',
-                },
-                {
-                    label: 'طلب جروب خاص',
-                    description: '@Private Group - طلب إنشاء روم/جروب خاص بك',
-                    value: 'private_group',
-                    emoji: '🔒',
-                },
-                {
-                    label: 'تقديم طلب إداري',
-                    description: '@Staff Apply - التقديم للانضمام لـ طاقم إدارة ASTRA',
-                    value: 'staff_apply',
-                    emoji: '👑',
-                },
-                {
-                    label: 'سجلي في التكت',
-                    description: 'عرض سجل حظر التكت الخاص بك في السيرفر',
-                    value: 'my_logs',
-                    emoji: '📜',
-                },
+                { label: 'استفسار', description: '@Inquiry', value: 'inquiry', emoji: '❓' },
+                { label: 'شكوى', description: '@Complaint', value: 'complaint', emoji: '📝' },
+                { label: 'طلب رول تفاعلي', description: '@Active Role', value: 'active_role', emoji: '⭐' },
+                { label: 'طلب جروب خاص', description: '@Private Group', value: 'private_group', emoji: '🔒' },
+                { label: 'تقديم طلب إداري', description: '@Staff Apply', value: 'staff_apply', emoji: '👑' },
+                { label: 'سجلي في التكت', description: 'عرض سجل حظر التكت الخاص بك', value: 'my_logs', emoji: '📜' },
             ]);
 
         const row = new ActionRowBuilder().addComponents(selectMenu);
 
-        await message.channel.send({
-            embeds: [embed],
-            components: [row],
-        });
+        await message.channel.send({ embeds: [embed], components: [row] });
     }
 });
 
 client.on('interactionCreate', async (interaction) => {
     // التعامل مع زر إغلاق التذكرة
     if (interaction.isButton() && interaction.customId === 'close_ticket') {
-        await interaction.reply('🔒 جاري إغلاق التذكرة وحذف القناة خلال 5 ثوانٍ...');
-        setTimeout(() => interaction.channel.delete().catch(() => {}), 5000);
+        await closeTicket(interaction.channel, interaction.user, interaction);
         return;
     }
 
@@ -129,7 +96,6 @@ client.on('interactionCreate', async (interaction) => {
     if (interaction.customId === 'ticket_select') {
         const selectedValue = interaction.values[0];
 
-        // في حال اختار "سجلي في التكت"
         if (selectedValue === 'my_logs') {
             return interaction.reply({ 
                 content: '❌ ليس لديك أي سجل حظر في نظام التذاكر الخاص بسيرفر ASTRA.', 
@@ -140,7 +106,7 @@ client.on('interactionCreate', async (interaction) => {
         let ticketTypeName = '';
         if (selectedValue === 'inquiry') ticketTypeName = 'استفسار';
         else if (selectedValue === 'complaint') ticketTypeName = 'شكوى';
-        else if (selectedValue === 'active_role') ticketTypeName = 'رول-نشط';
+        else if (selectedValue === 'active_role') ticketTypeName = 'رول-تفاعلي';
         else if (selectedValue === 'private_group') ticketTypeName = 'جروب-خاص';
         else if (selectedValue === 'staff_apply') ticketTypeName = 'طلب-إداري';
 
@@ -162,23 +128,19 @@ client.on('interactionCreate', async (interaction) => {
                 ],
             });
 
-            // 1. الرد التلقائي لإلغاء تحديد القائمة (يرجع القائمة المنسدلة لأصلها في الروم)
             await interaction.deferUpdate();
-
-            // 2. إرسال رسالة خاصة للعضو برابط التذكرة
             await interaction.followUp({ content: `✅ تم إنشاء تذكرتك بنجاح: ${channel}`, ephemeral: true });
 
-            // 3. إنشاء رسالة الترحيب والتحذير داخل التذكرة المفتوحة
             const ticketEmbed = new EmbedBuilder()
                 .setColor('#2b2d31')
                 .setTitle(`📩 تذكرة جديدة: ${ticketTypeName}`)
                 .setDescription(
                     `مرحباً بك ${interaction.user} في تذكرة **${ticketTypeName}**!\n\n` +
-                    '⏳ **يرجى انتظار الإدارة لقائك أو الرد عليك.**\n' +
-                    '⚠️ **تنبيه هام:** في حالة الإهمال، التحدث بشكل غير لائق، أو فتح التذكرة بدون سبب واضح، يتعرض العضو للعقوبة المناسبة من قبل طاقم الإدارة.\n\n' +
-                    'يرجى كتابة تفاصيل طلبك أو مشكلتك في أسفل الروم بوضوح.'
+                    '⏳ **في انتظار الإدارة لقبول التكت.**\n' +
+                    '⚠️ **تنبيه هام:** في حالة الإهمال، أو التحدث بشكل غير لائق، يتم تعرض العضو إلى العقوبة المناسبة من قبل طاقم الإدارة.\n\n' +
+                    'يرجى كتابة تفاصيل طلبك أو مشكلتك بوضوح هنا.'
                 )
-                .setFooter({ text: 'لإغلاق التذكرة اضغطي على الزر أسفله أو اكتبي !close' });
+                .setFooter({ text: 'لإغلاق التذكرة اضغط على الزر أسفله أو اكتب !close' });
 
             const closeButton = new ActionRowBuilder().addComponents(
                 new ButtonBuilder()
@@ -193,6 +155,23 @@ client.on('interactionCreate', async (interaction) => {
                 components: [closeButton],
             });
 
+            // 📜 إرسال لوق تكت جديد
+            const logChannel = interaction.guild.channels.cache.get(LOG_CHANNEL_ID);
+            if (logChannel) {
+                const logEmbed = new EmbedBuilder()
+                    .setColor('#00ff00')
+                    .setTitle('📂 تكت جديد — ' + ticketTypeName)
+                    .addFields(
+                        { name: '📌 القناة', value: `${channel}`, inline: true },
+                        { name: '🚨 النوع', value: `${ticketTypeName}`, inline: true },
+                        { name: '👤 العضو', value: `${interaction.user} (${interaction.user.username})`, inline: true },
+                        { name: '🕒 الوقت', value: `<t:${Math.floor(Date.now() / 1000)}:F>`, inline: false }
+                    )
+                    .setFooter({ text: 'ASTRA • سجل التذاكر' });
+
+                await logChannel.send({ embeds: [logEmbed] });
+            }
+
         } catch (error) {
             console.error(error);
             if (!interaction.replied) {
@@ -201,5 +180,32 @@ client.on('interactionCreate', async (interaction) => {
         }
     }
 });
+
+// دالة إغلاق التذكرة وتسجيل اللوق
+async function closeTicket(channel, user, interaction = null) {
+    if (interaction) {
+        await interaction.reply('🔒 جاري إغلاق التذكرة وحذف القناة وتسجيل اللوق خلال 5 ثوانٍ...');
+    } else {
+        await channel.send('🔒 جاري إغلاق التذكرة وحذف القناة وتسجيل اللوق خلال 5 ثوانٍ...');
+    }
+
+    // 📜 إرسال لوق إغلاق التكت
+    const logChannel = channel.guild.channels.cache.get(LOG_CHANNEL_ID);
+    if (logChannel) {
+        const closeLogEmbed = new EmbedBuilder()
+            .setColor('#ff0000')
+            .setTitle('📌 تكت مغلق')
+            .addFields(
+                { name: '📂 اسم القناة', value: `${channel.name}`, inline: true },
+                { name: '👤 تم إغلاقه بواسطة', value: `${user} (${user.username})`, inline: true },
+                { name: '🕒 الوقت', value: `<t:${Math.floor(Date.now() / 1000)}:F>`, inline: false }
+            )
+            .setFooter({ text: 'ASTRA • سجل التذاكر' });
+
+        await logChannel.send({ embeds: [closeLogEmbed] });
+    }
+
+    setTimeout(() => channel.delete().catch(() => {}), 5000);
+}
 
 client.login(process.env.TOKEN);
