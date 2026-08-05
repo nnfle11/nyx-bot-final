@@ -3,7 +3,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.get('/', (req, res) => {
-  res.send('Bot is working perfectly!');
+  res.send('ASTRA Bot Pro Ticket System is running!');
 });
 
 app.listen(port, '0.0.0.0', () => {
@@ -16,6 +16,8 @@ const {
   Partials, 
   ActionRowBuilder, 
   StringSelectMenuBuilder, 
+  ButtonBuilder,
+  ButtonStyle,
   EmbedBuilder, 
   ChannelType, 
   PermissionsBitField 
@@ -36,52 +38,70 @@ client.once('ready', () => {
 });
 
 client.on('messageCreate', async (message) => {
-    // الأمر لتنزيل قائمة التذاكر
+    // أمر إغلاق التذكرة إذا كتب العضو أو الإداري !close
+    if (message.content === '!close') {
+        if (message.channel.name.startsWith('ticket-')) {
+            await message.channel.send('🔒 جاري إغلاق التذكرة وحذف القناة خلال 5 ثوانٍ...');
+            setTimeout(() => message.channel.delete().catch(() => {}), 5000);
+            return;
+        }
+    }
+
+    // أمر تنزيل لوحة التذاكر
     if (message.content === '!setup-ticket') {
         if (!message.member.permissions.has(PermissionsBitField.Flags.Administrator)) return;
 
         const embed = new EmbedBuilder()
             .setColor('#2b2d31')
-            .setTitle('✦ ASTRA - نظام التذاكر والدعم الفني ✦')
-            .setDescription('مرحباً بكم في نظام الدعم الفني الخاص بسيرفر **ASTRA**.\nيرجى اختيار نوع التذكرة المناسب من القائمة المنسدلة أسفله:');
+            .setTitle('✦ ▬▬▬▬▬▬▬▬▬ [ 📩 مركز الدعم الفني - ASTRA ] ▬▬▬▬▬▬▬▬▬ ✦')
+            .setDescription(
+                '‏‎ \n' +
+                'مرحباً بكم في نظام الدعم الفني الخاص بسيرفر **ASTRA**.\n\n' +
+                '📌 **ملاحظات وقوانين مهمة قبل فتح التذكرة:**\n' +
+                '• يرجى اختيار نوع التذكرة المناسب لطلبك من القائمة المنسدلة أدناه.\n' +
+                '• في حال فتح تذكرة بدون سبب أو الاستهانة بالإدارة سيتم التعامل مع العضو بالعقوبة المناسبة.\n' +
+                '• يرجى الصبر وانتظار راد الإدارة وعدم تكرار الإشارات (Mention).\n\n' +
+                '▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬'
+            )
+            .setFooter({ text: 'ASTRA Support System • يرجى اختيار نوع التذكرة بالأسفل' });
 
         const selectMenu = new StringSelectMenuBuilder()
             .setCustomId('ticket_select')
-            .setPlaceholder('اختر نوع التذكرة...')
+            .setPlaceholder('اختر نوع التذكرة من هنا...')
             .addOptions([
                 {
                     label: 'استفسار',
-                    description: '@Inquiry',
+                    description: '@Inquiry - لطرح أي سؤال أو استفسار عام',
                     value: 'inquiry',
                     emoji: '❓',
                 },
                 {
                     label: 'شكوى',
-                    description: '@Complaint',
+                    description: '@Complaint - تقديم شكوى رسمية ضد عضو أو إداري',
                     value: 'complaint',
                     emoji: '📝',
                 },
                 {
                     label: 'طلب رول نشط',
-                    description: '@Active Role',
+                    description: '@Active Role - التقديم للحصول على الرتب التفاعلية',
                     value: 'active_role',
                     emoji: '⭐',
                 },
                 {
                     label: 'طلب جروب خاص',
-                    description: '@Private Group',
+                    description: '@Private Group - طلب إنشاء روم/جروب خاص بك',
                     value: 'private_group',
                     emoji: '🔒',
                 },
                 {
                     label: 'تقديم طلب إداري',
-                    description: '@Staff Apply',
+                    description: '@Staff Apply - التقديم للانضمام لـ طاقم إدارة ASTRA',
                     value: 'staff_apply',
                     emoji: '👑',
                 },
                 {
                     label: 'سجلي في التكت',
-                    description: 'عرض سجل حظر التكت الخاص بك',
+                    description: 'عرض سجل حظر التكت الخاص بك في السيرفر',
                     value: 'my_logs',
                     emoji: '📜',
                 },
@@ -97,15 +117,22 @@ client.on('messageCreate', async (message) => {
 });
 
 client.on('interactionCreate', async (interaction) => {
+    // التعامل مع زر إغلاق التذكرة
+    if (interaction.isButton() && interaction.customId === 'close_ticket') {
+        await interaction.reply('🔒 جاري إغلاق التذكرة وحذف القناة خلال 5 ثوانٍ...');
+        setTimeout(() => interaction.channel.delete().catch(() => {}), 5000);
+        return;
+    }
+
     if (!interaction.isStringSelectMenu()) return;
 
     if (interaction.customId === 'ticket_select') {
         const selectedValue = interaction.values[0];
 
-        // إذا اختار "سجلي في التكت"
+        // في حال اختار "سجلي في التكت"
         if (selectedValue === 'my_logs') {
             return interaction.reply({ 
-                content: '❌ ليس لديك أي سجل حظر في نظام التذاكر.', 
+                content: '❌ ليس لديك أي سجل حظر في نظام التذاكر الخاص بسيرفر ASTRA.', 
                 ephemeral: true 
             });
         }
@@ -135,11 +162,42 @@ client.on('interactionCreate', async (interaction) => {
                 ],
             });
 
-            await interaction.reply({ content: `✅ تم إنشاء تذكرتك بنجاح: ${channel}`, ephemeral: true });
-            await channel.send(`مرحباً بك ${interaction.user}، يرجى كتابة تفاصيل طلبك الخاص بـ (**${ticketTypeName}**) وسيقوم فريق الدعم بالرد عليك قريباً.`);
+            // 1. الرد التلقائي لإلغاء تحديد القائمة (يرجع القائمة المنسدلة لأصلها في الروم)
+            await interaction.deferUpdate();
+
+            // 2. إرسال رسالة خاصة للعضو برابط التذكرة
+            await interaction.followUp({ content: `✅ تم إنشاء تذكرتك بنجاح: ${channel}`, ephemeral: true });
+
+            // 3. إنشاء رسالة الترحيب والتحذير داخل التذكرة المفتوحة
+            const ticketEmbed = new EmbedBuilder()
+                .setColor('#2b2d31')
+                .setTitle(`📩 تذكرة جديدة: ${ticketTypeName}`)
+                .setDescription(
+                    `مرحباً بك ${interaction.user} في تذكرة **${ticketTypeName}**!\n\n` +
+                    '⏳ **يرجى انتظار الإدارة لقائك أو الرد عليك.**\n' +
+                    '⚠️ **تنبيه هام:** في حالة الإهمال، التحدث بشكل غير لائق، أو فتح التذكرة بدون سبب واضح، يتعرض العضو للعقوبة المناسبة من قبل طاقم الإدارة.\n\n' +
+                    'يرجى كتابة تفاصيل طلبك أو مشكلتك في أسفل الروم بوضوح.'
+                )
+                .setFooter({ text: 'لإغلاق التذكرة اضغطي على الزر أسفله أو اكتبي !close' });
+
+            const closeButton = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setCustomId('close_ticket')
+                    .setLabel('🔒 إغلاق التذكرة / Close')
+                    .setStyle(ButtonStyle.Danger)
+            );
+
+            await channel.send({
+                content: `${interaction.user}`,
+                embeds: [ticketEmbed],
+                components: [closeButton],
+            });
+
         } catch (error) {
             console.error(error);
-            await interaction.reply({ content: '❌ حدث خطأ أثناء إنشاء التذكرة، يرجى التأكد من صلاحيات البوت.', ephemeral: true });
+            if (!interaction.replied) {
+                await interaction.reply({ content: '❌ حدث خطأ أثناء إنشاء التذكرة، يرجى التأكد من صلاحيات البوت.', ephemeral: true });
+            }
         }
     }
 });
