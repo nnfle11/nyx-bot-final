@@ -3,7 +3,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.get('/', (req, res) => {
-  res.send('ASTRA Bot Pro Ticket System with Logs is running!');
+  res.send('ASTRA Bot Pro Ticket System with Admin Assignment is running!');
 });
 
 app.listen(port, '0.0.0.0', () => {
@@ -33,7 +33,7 @@ const client = new Client({
     partials: [Partials.Channel],
 });
 
-// ID قناة تكت-لوقز مدمج جاهز
+// ID قناة تكت-لوقز
 const LOG_CHANNEL_ID = '1523537562289967104';
 
 client.once('ready', () => {
@@ -55,16 +55,17 @@ client.on('messageCreate', async (message) => {
         const embed = new EmbedBuilder()
             .setColor('#2b2d31')
             .setDescription(
-                '# 👑 ‹ مَرْكَزُ الدَّعْمِ وَالْخِدْمَاتِ — ASTRA › 👑\n' +
-                '### ✦ ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬ ✦\n\n' +
-                '> 🌟 **أهلاً بك في قسم التذاكر الخاص بسيرفر ASTRA**\n' +
-                '> **يرجى قراءة التعليمات والتنبيهات أدناه قبل فتح أي تذكرة:**\n\n' +
-                '# 📌 ‹ التَّعْلِيمَاتُ وَالْقَوَانِينُ ›\n\n' +
-                '### 🔹 **`1`** ‹ اختر التصنيف المناسب لطلبك من القائمة أدناه لتسهيل خدمتك. ›\n' +
-                '### 🔹 **`2`** ‹ **بانتظار الإدارة لقبول التكت**، يرجى عدم تكرار التاغات (Mention). ›\n' +
-                '### 🔹 **`3`** ‹ فتح التذكرة بدواعي المزاح أو الاستهانة يتعرض صاحبه للعقوبة مباشرة. ›\n\n' +
-                '### ─── ⋆⋅☆⋅⋆ ────── ⋆⋅☆⋅⋆ ───\n' +
-                '# 💎 **طاقم ASTRA يتمنى لكم تجربة ممتعة**'
+                '# ‹ مَرْكَزُ الدَّعْمِ وَالْخِدْمَاتِ — ASTRA ›\n' +
+                '## ✦ ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬ ✦\n\n' +
+                '# **أهــــــــــــــلاً بــــــــك فــي قــسـم الــتــذاكر الـخاص بـســيرفـر اســتـرا**\n' +
+                '# **يــــــــــــــترجى قراءة التعليمات والتنبيهات أدناه قبل فتح أي تذكرة**\n\n' +
+                '## ─── ⋆⋅☆⋅⋆ ────────────────────────────────── ⋆⋅☆⋅⋆\n\n' +
+                '# ‹ التَّـــــــــــعْـــــــلِـــيمَــاتُ وَالْقَــوَانِــيــنُ ›\n\n' +
+                '# **`1`** ‹ **اختر التصنيف المناسب لطلبك من القائمة أدناه لتسهيل خدمتك.** ›\n\n' +
+                '# **`2`** ‹ **بانتظار الإدارة لقبول التكت، لا تمنشن اي اداري البوت يختار وحده .** ›\n\n' +
+                '# **`3`** ‹ **فتح التذكرة بدواعي المزاح أو الاستهانة يتعرض صاحبه للعقوبة مباشرة.** ›\n\n' +
+                '## ───── ⋆⋅☆⋅⋆ ────────────────────────── ⋆⋅☆⋅⋆ ─────\n\n' +
+                '# **طاقم ASTRA يتمنى لكم تجربة ممتعة**'
             )
             .setFooter({ text: 'ASTRA Support System • يرجى اختيار نوع التذكرة بالأسفل' });
 
@@ -72,12 +73,12 @@ client.on('messageCreate', async (message) => {
             .setCustomId('ticket_select')
             .setPlaceholder('اختر نوع التذكرة...')
             .addOptions([
-                { label: 'استفسار', description: '@Inquiry', value: 'inquiry', emoji: '❓' },
-                { label: 'شكوى', description: '@Complaint', value: 'complaint', emoji: '📝' },
-                { label: 'طلب رول تفاعلي', description: '@Active Role', value: 'active_role', emoji: '⭐' },
-                { label: 'طلب جروب خاص', description: '@Private Group', value: 'private_group', emoji: '🔒' },
-                { label: 'تقديم طلب إداري', description: '@Staff Apply', value: 'staff_apply', emoji: '👑' },
-                { label: 'سجلي في التكت', description: 'عرض سجل حظر التكت الخاص بك', value: 'my_logs', emoji: '📜' },
+                { label: 'استفسار', description: '@Inquiry', value: 'inquiry' },
+                { label: 'شكوى', description: '@Complaint', value: 'complaint' },
+                { label: 'طلب رول تفاعلي', description: '@Active Role', value: 'active_role' },
+                { label: 'طلب جروب خاص', description: '@Private Group', value: 'private_group' },
+                { label: 'تقديم طلب إداري', description: '@Staff Apply', value: 'staff_apply' },
+                { label: 'سجلي في التكت', description: 'عرض سجل حظر التكت الخاص بك', value: 'my_logs' },
             ]);
 
         const row = new ActionRowBuilder().addComponents(selectMenu);
@@ -100,7 +101,7 @@ client.on('interactionCreate', async (interaction) => {
 
         if (selectedValue === 'my_logs') {
             return interaction.reply({ 
-                content: '❌ ليس لديك أي سجل حظر في نظام التذاكر الخاص بسيرفر ASTRA.', 
+                content: 'ليس لديك أي سجل حظر في نظام التذاكر الخاص بسيرفر ASTRA.', 
                 ephemeral: true 
             });
         }
@@ -115,6 +116,14 @@ client.on('interactionCreate', async (interaction) => {
         const channelName = `ticket-${ticketTypeName}-${interaction.user.username}`;
         
         try {
+            // جلب جميع الأعضاء الذين لديهم صلاحيات الإدارة (Administrator)
+            const members = await interaction.guild.members.fetch();
+            const adminMembers = members.filter(m => !m.user.bot && m.permissions.has(PermissionsBitField.Flags.Administrator));
+            
+            // اختيار أدمن واحد عشوائياً
+            const randomAdmin = adminMembers.random();
+            const assignedAdminText = randomAdmin ? `${randomAdmin}` : 'طاقم الإدارة';
+
             const channel = await interaction.guild.channels.create({
                 name: channelName,
                 type: ChannelType.GuildText,
@@ -127,19 +136,24 @@ client.on('interactionCreate', async (interaction) => {
                         id: interaction.user.id,
                         allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages],
                     },
+                    ...(randomAdmin ? [{
+                        id: randomAdmin.id,
+                        allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages],
+                    }] : [])
                 ],
             });
 
             await interaction.deferUpdate();
-            await interaction.followUp({ content: `✅ تم إنشاء تذكرتك بنجاح: ${channel}`, ephemeral: true });
+            await interaction.followUp({ content: `تم إنشاء تذكرتك بنجاح: ${channel}`, ephemeral: true });
 
             const ticketEmbed = new EmbedBuilder()
                 .setColor('#2b2d31')
-                .setTitle(`📩 تذكرة جديدة: ${ticketTypeName}`)
+                .setTitle(`تذكرة جديدة: ${ticketTypeName}`)
                 .setDescription(
-                    `مرحباً بك ${interaction.user} في تذكرة **${ticketTypeName}**!\n\n` +
-                    '⏳ **بانتظار الإدارة لقبول التكت.**\n' +
-                    '⚠️ **تنبيه هام:** في حالة الإهمال، أو التحدث بشكل غير لائق، يتم تعرض العضو إلى العقوبة المناسبة من قبل طاقم الإدارة.\n\n' +
+                    `# مرحباً بك ${interaction.user} في تذكرة **${ticketTypeName}**!\n\n` +
+                    `**الإداري المسؤول المستلم للتكت:** ${assignedAdminText}\n\n` +
+                    '**بانتظار الإدارة لقبول التكت.**\n' +
+                    '**تنبيه هام:** في حالة الإهمال، أو التحدث بشكل غير لائق، يتم تعرض العضو إلى العقوبة المناسبة من قبل طاقم الإدارة.\n\n' +
                     'يرجى كتابة تفاصيل طلبك أو مشكلتك بوضوح هنا.'
                 )
                 .setFooter({ text: 'لإغلاق التذكرة اضغط على الزر أسفله أو اكتب !close' });
@@ -147,27 +161,28 @@ client.on('interactionCreate', async (interaction) => {
             const closeButton = new ActionRowBuilder().addComponents(
                 new ButtonBuilder()
                     .setCustomId('close_ticket')
-                    .setLabel('🔒 إغلاق التذكرة / Close')
+                    .setLabel('إغلاق التذكرة / Close')
                     .setStyle(ButtonStyle.Danger)
             );
 
             await channel.send({
-                content: `${interaction.user}`,
+                content: `${interaction.user} | ${assignedAdminText}`,
                 embeds: [ticketEmbed],
                 components: [closeButton],
             });
 
-            // 📜 إرسال لوق تكت جديد
+            // إرسال لوق تكت جديد
             const logChannel = interaction.guild.channels.cache.get(LOG_CHANNEL_ID);
             if (logChannel) {
                 const logEmbed = new EmbedBuilder()
                     .setColor('#00ff00')
-                    .setTitle('📂 تكت جديد — ' + ticketTypeName)
+                    .setTitle('تكت جديد — ' + ticketTypeName)
                     .addFields(
-                        { name: '📌 القناة', value: `${channel}`, inline: true },
-                        { name: '🚨 النوع', value: `${ticketTypeName}`, inline: true },
-                        { name: '👤 العضو', value: `${interaction.user} (${interaction.user.username})`, inline: true },
-                        { name: '🕒 الوقت', value: `<t:${Math.floor(Date.now() / 1000)}:F>`, inline: false }
+                        { name: 'القناة', value: `${channel}`, inline: true },
+                        { name: 'النوع', value: `${ticketTypeName}`, inline: true },
+                        { name: 'العضو', value: `${interaction.user} (${interaction.user.username})`, inline: true },
+                        { name: 'الإداري المكلف', value: `${assignedAdminText}`, inline: true },
+                        { name: 'الوقت', value: `<t:${Math.floor(Date.now() / 1000)}:F>`, inline: false }
                     )
                     .setFooter({ text: 'ASTRA • سجل التذاكر' });
 
@@ -177,7 +192,7 @@ client.on('interactionCreate', async (interaction) => {
         } catch (error) {
             console.error(error);
             if (!interaction.replied) {
-                await interaction.reply({ content: '❌ حدث خطأ أثناء إنشاء التذكرة، يرجى التأكد من صلاحيات البوت.', ephemeral: true });
+                await interaction.reply({ content: 'حدث خطأ أثناء إنشاء التذكرة، يرجى التأكد من صلاحيات البوت.', ephemeral: true });
             }
         }
     }
@@ -186,21 +201,21 @@ client.on('interactionCreate', async (interaction) => {
 // دالة إغلاق التذكرة وتسجيل اللوق
 async function closeTicket(channel, user, interaction = null) {
     if (interaction) {
-        await interaction.reply('🔒 جاري إغلاق التذكرة وحذف القناة وتسجيل اللوق خلال 5 ثوانٍ...');
+        await interaction.reply('جاري إغلاق التذكرة وحذف القناة وتسجيل اللوق خلال 5 ثوانٍ...');
     } else {
-        await channel.send('🔒 جاري إغلاق التذكرة وحذف القناة وتسجيل اللوق خلال 5 ثوانٍ...');
+        await channel.send('جاري إغلاق التذكرة وحذف القناة وتسجيل اللوق خلال 5 ثوانٍ...');
     }
 
-    // 📜 إرسال لوق إغلاق التكت
+    // إرسال لوق إغلاق التكت
     const logChannel = channel.guild.channels.cache.get(LOG_CHANNEL_ID);
     if (logChannel) {
         const closeLogEmbed = new EmbedBuilder()
             .setColor('#ff0000')
-            .setTitle('📌 تكت مغلق')
+            .setTitle('تكت مغلق')
             .addFields(
-                { name: '📂 اسم القناة', value: `${channel.name}`, inline: true },
-                { name: '👤 تم إغلاقه بواسطة', value: `${user} (${user.username})`, inline: true },
-                { name: '🕒 الوقت', value: `<t:${Math.floor(Date.now() / 1000)}:F>`, inline: false }
+                { name: 'اسم القناة', value: `${channel.name}`, inline: true },
+                { name: 'تم إغلاقه بواسطة', value: `${user} (${user.username})`, inline: true },
+                { name: 'الوقت', value: `<t:${Math.floor(Date.now() / 1000)}:F>`, inline: false }
             )
             .setFooter({ text: 'ASTRA • سجل التذاكر' });
 
